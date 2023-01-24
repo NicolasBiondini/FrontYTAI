@@ -1,7 +1,18 @@
-import { getOnly, getResults } from "@/api/getResults";
-import { Button, Flex, Input, Spinner, useToast } from "@chakra-ui/react";
+import React, { useState } from "react";
+import { getResults } from "@/api/getResults";
+import { validateYouTubeUrl } from "@/helpers/ytUrlValidation";
+import {
+  Button,
+  Checkbox,
+  Flex,
+  Radio,
+  RadioGroup,
+  Input,
+  Spinner,
+  Stack,
+  useToast,
+} from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React, { MouseEvent } from "react";
 
 type Props = {};
 
@@ -9,6 +20,13 @@ function Searcher({}: Props) {
   const queryClient = useQueryClient();
 
   const toast = useToast();
+
+  const [form, setForm] = useState({
+    link: "",
+    twitter: true,
+    blog: false,
+    lang: "eng",
+  });
 
   const { mutate, isLoading } = useMutation(getResults, {
     onSuccess: (data) => {
@@ -31,19 +49,68 @@ function Searcher({}: Props) {
     },
   });
 
-  const handleSubmit = (e: MouseEvent<HTMLButtonElement>) => {
-    const value = e.currentTarget.parentNode?.childNodes[0] as HTMLInputElement;
-    mutate(value.value);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!validateYouTubeUrl(form.link))
+      return toast({
+        title: "Please, insert a correct YT link 😬.",
+        description: "Try again with another YT link.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+        position: "bottom-right",
+      });
+    mutate(form);
   };
 
   return (
     <Flex flexDirection={"column"} alignItems={"stretch"} gap={"32px"}>
-      <Flex flexDirection={"row"} gap={"10px"}>
-        <Input placeholder={"Insert a YT video link"} />
-        <Button onClick={handleSubmit} isDisabled={isLoading}>
-          Send
-        </Button>
-      </Flex>
+      <form
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+        }}
+        onSubmit={(e) => handleSubmit(e)}
+      >
+        <Flex flexDirection={"row"} gap={"10px"}>
+          <Input
+            placeholder={"Insert a YT video link"}
+            onChange={(e) => setForm({ ...form, link: e.target.value })}
+          />
+          <Button type="submit" isDisabled={isLoading}>
+            Send
+          </Button>
+        </Flex>
+        <Stack spacing={5} direction="row" alignSelf={"center"}>
+          <Checkbox
+            colorScheme="red"
+            defaultChecked
+            onChange={(e) => setForm({ ...form, twitter: e.target.checked })}
+          >
+            Thread
+          </Checkbox>
+          <Checkbox
+            colorScheme="red"
+            onChange={(e) => setForm({ ...form, blog: e.target.checked })}
+          >
+            Blog Post
+          </Checkbox>
+          <RadioGroup
+            onChange={(e) => setForm({ ...form, lang: e })}
+            value={form.lang}
+          >
+            <Stack direction="row">
+              <Radio value="eng" colorScheme={"red"}>
+                English
+              </Radio>
+              <Radio value="es" colorScheme={"red"}>
+                Spanish
+              </Radio>
+            </Stack>
+          </RadioGroup>
+        </Stack>
+      </form>
       {isLoading && (
         <Spinner
           alignSelf={"center"}

@@ -1,13 +1,13 @@
 import {
   Button,
   Code,
-  Text,
   useColorMode,
   useToast,
   useClipboard,
+  Flex,
 } from "@chakra-ui/react";
+import ReactMarkdown from "react-markdown";
 import React, { useEffect } from "react";
-
 type Props = {
   children: string;
 };
@@ -23,7 +23,7 @@ const Icon = () => {
 const ClipBoardText = ({ children }: Props) => {
   const { colorMode } = useColorMode();
   const toast = useToast();
-  const { onCopy, value, setValue, hasCopied } = useClipboard("");
+  const { onCopy, setValue } = useClipboard("");
 
   useEffect(() => {
     setValue(children);
@@ -41,7 +41,16 @@ const ClipBoardText = ({ children }: Props) => {
       justifyContent={"space-between"}
       gap="24px"
     >
-      <Text dangerouslySetInnerHTML={{ __html: children }} />
+      <Flex
+        flexDirection={"column"}
+        p={"24px"}
+        gap={"18px"}
+        maxW={"75%"}
+        overflowX={"auto"}
+      >
+        <ReactMarkdown>{children}</ReactMarkdown>
+      </Flex>
+
       <Button
         minW={"50px"}
         h={"50px"}

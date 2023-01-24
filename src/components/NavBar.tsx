@@ -28,6 +28,7 @@ function NavBar({}: Props) {
             alt="YT AI"
           />
           <Switch
+            colorScheme={"red"}
             onChange={toggleColorMode}
             isChecked={colorMode === "light" ? false : true}
           />
